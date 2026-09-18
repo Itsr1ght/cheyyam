@@ -1,9 +1,11 @@
-FROM oven:/bun:1.0-alpine AS builder
+FROM oven/bun:1.3.11-alpine
 
 WORKDIR /app
 
-COPY package.json bun.lockb /app/
+COPY package.json bun.lock /app/
 RUN bun install --frozen-lockfile
-COPY . /app/
+
+COPY . /app
 EXPOSE 5173
-CMD [ "bun", "run", "dev", "host" ]
+
+CMD [ "bun", "start"]
