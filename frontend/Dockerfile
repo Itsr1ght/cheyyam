@@ -8,4 +8,4 @@ RUN bun install
 COPY . /app
 EXPOSE 3000
 
-CMD [ "bun", "run", "start"]
+CMD ["/usr/local/bin/bun", "run", "dev"]

@@ -43,6 +43,8 @@ services:
       - backend
     environment:
       - VITE_API_URL=http://localhost:3000
+      - FS_WATCHER=polling
+      - CHOKIDAR_USEPOLLING=true
 
 volumes:
   postgres_data:
