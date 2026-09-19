@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data/pgdata
     environment:
       - POSTGRES_DB=django_db
       - POSTGRES_USER=user
@@ -17,21 +15,29 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      command: >
-        sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-      volumes:
-        - ./backend:/app
-        - backend_venv:/app/.venv
-      ports:
-        - "8000:8000"
-      environment:
-        - DB_NAME=django_db
-        - DB_USER=user
-        - DB_PASSWORD=password
-        - DB_HOST=db
-        - DB_PORT=5432
-      depends_on:
-        - db
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=django_db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - .venv/
+            - __pycache__/
+            - db.sqlite3
+        - action: rebuild
+          path: ./backend/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
 
   frontend:
     build:
@@ -43,8 +49,15 @@ services:
       - backend
     environment:
       - VITE_API_URL=http://localhost:3000
-      - FS_WATCHER=polling
-      - CHOKIDAR_USEPOLLING=true
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./frontend/package.json
 
 volumes:
   postgres_data:
